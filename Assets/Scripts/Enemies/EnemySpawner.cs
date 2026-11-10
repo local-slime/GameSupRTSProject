@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace GS
@@ -8,38 +9,28 @@ namespace GS
         [SerializeField] private GameObject _prefabEnemy;
         [SerializeField] private int _numberEnemyToSpawn;
         [SerializeField] private float _intervalTimeSpawn;
-        
-        private float _spawnTimer;
-        private int _numberEnemySpawned;
-        
+
+        private WaitForSeconds _waitForSeconds;
+
         private void Start()
         {
-            _spawnTimer = 0;
-            _numberEnemySpawned = 0;
+            _waitForSeconds = new WaitForSeconds(_intervalTimeSpawn);
+            StartCoroutine(SpawnEnemiesCoroutine());
         }
 
-        private void Update()
+        private IEnumerator SpawnEnemiesCoroutine()
         {
-            if (_numberEnemySpawned >= _numberEnemyToSpawn)
+            for (int i = 0; i < _numberEnemyToSpawn; i++)
             {
-                return;
-            }
-            
-            _spawnTimer += Time.deltaTime;
-
-            if (_spawnTimer > _intervalTimeSpawn)
-            {
-                _spawnTimer = 0;
-                _numberEnemySpawned++;
-                
-                // Spawn enemy
                 GameObject instanceEnemy = Instantiate(_prefabEnemy, Vector3.zero, Quaternion.identity);
                 Enemy enemy = instanceEnemy.GetComponent<Enemy>();
 
                 // Set random path
                 int randomIndex = Random.Range(0, _path.Length);
                 enemy.SetPath(_path[randomIndex]);
+                yield return _waitForSeconds;
             }
+            _waitForSeconds = null;
         }
     }
 }
